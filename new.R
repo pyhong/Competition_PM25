@@ -46,25 +46,36 @@ kmc_test<-sapply(testy, tag_t)
 kmc_train<-sapply(trainy, tag_t)
 
 library(e1071)
-kmcy<-cbind(kmc_train, trainx)
-svmc<-svm(kmc_train~.,data=kmcy, cost = 10,type="C-classification")
-table(predict(svmc), kmc_train)
-pred<-predict(svmc, testx)
-table(pred,kmc_test)
 
+#SVM only
+kmcy<-cbind(kmc_train, trainx)
+svmc<-svm(kmc_train~.,data=kmcy, cost = 3.1,type="C-classification")
+table(predict(svmc), kmc_train)  #confusion matrix for train data
+pred<-predict(svmc, testx)
+table(pred,kmc_test)  #confusion matrix for test data
+error_rate<-sum(predict(svmc, testx)!=kmc_test)/length(kmc_test)
+print(error_rate) #output error rate
+
+#SVM with princomp
 pri.x<-princomp(trainx)
-pre.x<-predict(pri.x,newdata=trainx)
+pre.x<-predict(pri.x,newdata=trainx)[,1:4]
 kmc_c<-cbind(kmc_train, pre.x)
-svm_c<-svm(kmc_train~.,data=kmc_c,type="C-classification",cost=22)
-table(predict(svm_c),kmc_train)
+svm_c<-svm(kmc_train~.,data=kmc_c,type="C-classification",cost=0.1)
+table(predict(svm_c),kmc_train) #confusion matrix for train data
 test.x<-predict(pri.x,newdata=testx)
 dim(test.x)
-table(predict(svm_c,test.x),kmc_test)
+table(predict(svm_c,test.x),kmc_test) #confusion matrix for test data
+error_rate<-sum(predict(svm_c, test.x)!=kmc_test)/length(kmc_test)
+print(error_rate)  #output error rate
 
-rng<-seq(0.1,100,0.1)
-error_rate<-rng
-for(i in 1:length(rng))
-    {
-        svm.fit<-svm(kmc_train~.,data=kmc_c,type="C-classification",cost=rng[i])
-        error_rate<-sum(predict(svm.fit, test.x)!=kmc_test)
-    }
+#CONCLUSION: Even though there exists no significant difference of error rate between 
+#SVM-only and SVM-with-princomp, the coefficient of penality decreases to 0.1 
+#when dealing with princomp
+
+# rng<-seq(0.1,100,0.1)
+# error_rate<-rng
+# for(i in 1:length(rng))
+#     {
+#         svm.fit<-svm(kmc_train~.,data=kmc_c,type="C-classification",cost=rng[i])
+#         error_rate[i]<-sum(predict(svm.fit, test.x)!=kmc_test)
+#     }
