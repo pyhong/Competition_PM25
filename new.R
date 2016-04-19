@@ -47,7 +47,24 @@ kmc_train<-sapply(trainy, tag_t)
 
 library(e1071)
 kmcy<-cbind(kmc_train, trainx)
-svmc<-svm(kmc_train~.,data=kmcy, cost = 22,type="C-classification")
+svmc<-svm(kmc_train~.,data=kmcy, cost = 10,type="C-classification")
 table(predict(svmc), kmc_train)
 pred<-predict(svmc, testx)
-table(kmc_test,pred)
+table(pred,kmc_test)
+
+pri.x<-princomp(trainx)
+pre.x<-predict(pri.x,newdata=trainx)
+kmc_c<-cbind(kmc_train, pre.x)
+svm_c<-svm(kmc_train~.,data=kmc_c,type="C-classification",cost=22)
+table(predict(svm_c),kmc_train)
+test.x<-predict(pri.x,newdata=testx)
+dim(test.x)
+table(predict(svm_c,test.x),kmc_test)
+
+rng<-seq(0.1,100,0.1)
+error_rate<-rng
+for(i in 1:length(rng))
+    {
+        svm.fit<-svm(kmc_train~.,data=kmc_c,type="C-classification",cost=rng[i])
+        error_rate<-sum(predict(svm.fit, test.x)!=kmc_test)
+    }
