@@ -10,7 +10,7 @@ for(i in 2:7)
   t2[,i]<-as.numeric(t2[,i])
 }
 
-dt1<-read.table("广州气象数据.txt",sep=",",head=T)
+dt1<-read.csv("广州气象数据.csv",sep=",",head=T)
 dt1[,1]<-as.character(as.Date(dt1$CST),format="%Y-%m-%d")
 colnames(dt1)<-c("日期",colnames(dt1)[-1])
 
